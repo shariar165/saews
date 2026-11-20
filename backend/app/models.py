@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from datetime import UTC, date, datetime
 
 from sqlalchemy import (
@@ -14,6 +15,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    TypeDecorator,
     UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -23,6 +25,20 @@ from .database import Base
 
 def utcnow() -> datetime:
     return datetime.now(UTC)
+
+
+class SafeFloat(TypeDecorator):
+    """Float that stores NaN as NULL on every backend (SQLite does this implicitly; PostgreSQL keeps NaN,
+    which then breaks JSON responses and SQL aggregates)."""
+
+    impl = Float
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        return None if isinstance(value, float) and math.isnan(value) else value
+
+    def process_result_value(self, value, dialect):
+        return None if isinstance(value, float) and math.isnan(value) else value
 
 
 class Role:
@@ -57,7 +73,7 @@ class Student(Base):
     full_name: Mapped[str] = mapped_column(String(200))
     program: Mapped[str] = mapped_column(String(120), index=True)
     year_of_study: Mapped[int] = mapped_column(Integer)
-    prior_gpa: Mapped[float | None] = mapped_column(Float)
+    prior_gpa: Mapped[float | None] = mapped_column(SafeFloat)
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), unique=True)
     advisor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True)
     # Synthetic, evaluation-only attribute used for subgroup fairness checks. NEVER a model feature.
@@ -115,8 +131,8 @@ class AssessmentScore(Base):
     assessment_name: Mapped[str] = mapped_column(String(120))
     date: Mapped[date] = mapped_column(Date)
     week: Mapped[int] = mapped_column(Integer)
-    score: Mapped[float] = mapped_column(Float)
-    max_score: Mapped[float] = mapped_column(Float)
+    score: Mapped[float] = mapped_column(SafeFloat)
+    max_score: Mapped[float] = mapped_column(SafeFloat)
     import_batch_id: Mapped[int | None] = mapped_column(ForeignKey("import_batches.id", ondelete="SET NULL"))
 
 
@@ -174,14 +190,14 @@ class RiskAssessment(Base):
     is_current: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     # low | moderate | high | critical | insufficient_data | unavailable
     risk_level: Mapped[str] = mapped_column(String(20), index=True)
-    probability: Mapped[float | None] = mapped_column(Float)
+    probability: Mapped[float | None] = mapped_column(SafeFloat)
     rule_points: Mapped[int | None] = mapped_column(Integer)
     method: Mapped[str] = mapped_column(String(20))  # model | rules_fallback | none | unavailable
     model_version: Mapped[str | None] = mapped_column(String(60))
     reliable: Mapped[bool] = mapped_column(Boolean, default=True)
     data_as_of: Mapped[date | None] = mapped_column(Date)
     data_age_days: Mapped[int | None] = mapped_column(Integer)
-    completeness: Mapped[float] = mapped_column(Float, default=0.0)
+    completeness: Mapped[float] = mapped_column(SafeFloat, default=0.0)
     missing_fields: Mapped[list] = mapped_column(JSON, default=list)
     warnings: Mapped[list] = mapped_column(JSON, default=list)
     factors: Mapped[list] = mapped_column(JSON, default=list)
@@ -229,7 +245,7 @@ class Recommendation(Base):
     catalog_code: Mapped[str] = mapped_column(String(40))
     title: Mapped[str] = mapped_column(String(200))
     rationale: Mapped[str] = mapped_column(Text)
-    score: Mapped[float] = mapped_column(Float, default=0.0)
+    score: Mapped[float] = mapped_column(SafeFloat, default=0.0)
     status: Mapped[str] = mapped_column(String(20), default="proposed")  # proposed | approved | dismissed
     edited_text: Mapped[str | None] = mapped_column(Text)
     review_note: Mapped[str | None] = mapped_column(Text)
