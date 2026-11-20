@@ -17,3 +17,4 @@ backend/app/ml/artifacts/*
 
 .vercel
 .env*
+!.env.example
