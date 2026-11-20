@@ -13,5 +13,6 @@ python-multipart>=0.0.18
 slowapi>=0.1.9
 pandas>=2.2
 numpy>=2.1
-scikit-learn>=1.5
+scikit-learn~=1.9.1  # pinned: the committed model artifact was pickled with 1.9.x
 joblib>=1.4
+psycopg[binary]>=3.2  # PostgreSQL driver (Neon on Vercel)

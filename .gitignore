@@ -14,3 +14,6 @@ data/*.db-shm
 # Trained model artifacts (regenerate with: python -m backend.app.ml.train)
 backend/app/ml/artifacts/*
 !backend/app/ml/artifacts/.gitkeep
+
+.vercel
+.env*

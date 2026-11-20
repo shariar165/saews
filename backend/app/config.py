@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -18,7 +19,11 @@ class Settings(BaseSettings):
     demo_mode: bool = True
 
     # Database: SQLite for the local prototype; set to a postgresql+psycopg:// URL for multi-user deployment.
-    database_url: str = f"sqlite:///{(PROJECT_ROOT / 'data' / 'saews.db').as_posix()}"
+    # On Vercel + Neon, the integration injects DATABASE_URL; EWS_DATABASE_URL still takes precedence.
+    database_url: str = Field(
+        default=f"sqlite:///{(PROJECT_ROOT / 'data' / 'saews.db').as_posix()}",
+        validation_alias=AliasChoices("EWS_DATABASE_URL", "DATABASE_URL"),
+    )
 
     # Auth
     jwt_secret: str = "dev-only-change-me-0f6b1c2d9e8a7f3b"
@@ -42,6 +47,15 @@ class Settings(BaseSettings):
     retention_days: int = 730  # historical risk assessments / closed import batches
     audit_retention_days: int = 365
     max_upload_bytes: int = 5 * 1024 * 1024
+
+    @field_validator("database_url")
+    @classmethod
+    def _use_psycopg_driver(cls, v: str) -> str:
+        # Hosted Postgres URLs (postgres:// or postgresql://) -> SQLAlchemy's psycopg 3 dialect.
+        for prefix in ("postgres://", "postgresql://"):
+            if v.startswith(prefix):
+                return "postgresql+psycopg://" + v.removeprefix(prefix)
+        return v
 
 
 @lru_cache
