@@ -9,6 +9,20 @@ for staff to review, and tracks follow-up, with privacy, audit and fairness safe
 > disciplinary, admission or eligibility decisions, and no action is triggered automatically.
 > All bundled data is **synthetic** (fictional students).
 
+## Live demo
+
+**https://saews.vercel.app** — sign in with any of the [demo accounts](#demo-accounts-demo-mode-only-password-demo2026)
+below (password `Demo@2026!`), e.g. `teacher1@saews.demo`, `student@saews.demo` or `admin@saews.demo`.
+The [suggested walkthrough](#suggested-demo-walkthrough) works there too.
+
+- Hosted on **Vercel** (FastAPI as a single Python function via `index.py`) with a **Neon Postgres** database.
+  Every push to `main` redeploys automatically.
+- The live database is a **shared demo**: changes made by any visitor (imports, plans, goals) are visible to everyone.
+  It is separate from your local SQLite database.
+- Vercel installs dependencies from `pyproject.toml` — keep it in sync with `requirements.txt` when adding packages.
+- The deployed app loads the model committed in `backend/app/ml/artifacts/`. After retraining, commit the new
+  `registry.json`, `model_*.joblib` and `metrics_*.json` (`git add -f`, the folder is git-ignored) and push.
+
 ## Features (SRS traceability)
 
 | SRS | Feature | Where |
