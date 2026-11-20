@@ -1,0 +1,23 @@
+[project]
+name = "saews"
+version = "1.0.0"
+description = "AI-Driven Socio-Academic Early Warning & Personalized Decision Support System (SE331 capstone prototype)"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning", "ignore:Using `httpx`"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py311"
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["B008"]  # FastAPI Depends() in defaults
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+"backend/app/services/recommendations.py" = ["E501"]  # catalogue text

@@ -1,0 +1,16 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Local data & secrets
+.env
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Trained model artifacts (regenerate with: python -m backend.app.ml.train)
+backend/app/ml/artifacts/*
+!backend/app/ml/artifacts/.gitkeep
