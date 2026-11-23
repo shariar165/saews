@@ -9,7 +9,7 @@ if (user) {
     <div class="page-head"><div><p class="eyebrow">${esc(todayLong())}</p><h1>Welcome back, ${esc(user.full_name.split(" ")[0])}</h1>
       <p>Early-warning overview for the students you are authorized to support.</p></div>
       <span class="pill" id="last-run" hidden><span class="dot" aria-hidden="true"></span><span></span></span></div>
-    <div class="notice">Risk levels are <strong>estimates</strong> based on attendance, assessments, assignments and learning-platform
+    <div class="notice">Risk levels are <strong>estimates</strong> based on attendance, class tests/exams, homework and online learning portal
       activity. Review the contributing factors and talk with the student before acting. No action is taken automatically.</div>
     <section class="grid grid-4" aria-label="Key figures" id="kpis"></section>
     <div class="grid grid-main mt">

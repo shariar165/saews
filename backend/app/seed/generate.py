@@ -1,4 +1,4 @@
-r"""Create the database schema and load a synthetic demo institution.
+r"""Create the database schema and load a synthetic demo school & college.
 
     .\.venv\Scripts\python.exe -m backend.app.seed.generate [--students 300] [--reset]
 
@@ -28,11 +28,16 @@ from ..models import (
     User,
 )
 from ..services.recommendations import ensure_catalog
-from .synthetic import COURSES, generate_cohort, term_start_for
+from .synthetic import COURSES, generate_cohort, level_of, term_start_for
 
 TEACHER_COURSES = {
-    "teacher1@saews.demo": ["SE331", "SE221", "CSE311", "CSE331"],
-    "teacher2@saews.demo": ["CSE215", "MAT211", "BUS101", "ACC201", "ENG101"],
+    # Mathematics, science and accounting. College Humanities students take none of these, so they are
+    # outside teacher1's scope (used by the access-control acceptance test AT-01).
+    "teacher1@saews.demo": ["SSC-MATH", "SSC-PHY", "SSC-CHEM", "SSC-ACC",
+                            "HSC-PHY", "HSC-CHEM", "HSC-ACC"],
+    # Languages, ICT, business and humanities
+    "teacher2@saews.demo": ["SSC-BAN", "SSC-ENG", "SSC-FIN", "SSC-HIST", "SSC-GEO",
+                            "HSC-BAN", "HSC-ENG", "HSC-ICT", "HSC-BOM", "HSC-CIV", "HSC-ECO"],
 }
 DEMO_USERS = [
     ("admin@saews.demo", "Nadia Admin", Role.ADMIN),
@@ -70,7 +75,7 @@ def seed(db: Session, n_students: int = 300, seed_value: int = 42, today: date |
     db.flush()
 
     start = term_start_for(today)
-    term = f"Fall {start.year}"
+    term = f"Second Term {start.year}"
     courses: dict[str, Course] = {}
     for email, codes in TEACHER_COURSES.items():
         for code in codes:
@@ -82,7 +87,8 @@ def seed(db: Session, n_students: int = 300, seed_value: int = 42, today: date |
     cohort = generate_cohort(n_students, seed=seed_value, term_start=start, special_cases=True)
     students: dict[str, Student] = {}
     for r in cohort.students.to_dict("records"):
-        advisor = users["advisor1@saews.demo"] if r["program"] == "BSc Software Engineering" else users["advisor2@saews.demo"]
+        # Class advisors: advisor1 for school (Class 9-10), advisor2 for college (Class 11-12).
+        advisor = users["advisor1@saews.demo"] if level_of(r["program"]) == "School" else users["advisor2@saews.demo"]
         st = Student(student_code=r["student_code"], full_name=r["full_name"], program=r["program"],
                      year_of_study=r["year_of_study"], prior_gpa=r["prior_gpa"], advisor_id=advisor.id,
                      equity_group=r["equity_group"])

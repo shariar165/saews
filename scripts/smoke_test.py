@@ -152,12 +152,12 @@ def main() -> int:
     check(all("risk" not in k for k in sup), "no risk labels exposed to student")
     timed_get(student, "/api/me/indicators")
     check(student.get(f"/api/students/{sid}").status_code == 403, "student blocked from staff endpoints")
-    g = student.post("/api/me/goals", json={"title": "Attend every SE331 class", "target_date": due})
+    g = student.post("/api/me/goals", json={"title": "Attend every SSC-MATH class", "target_date": due})
     check(g.status_code == 201, "create study goal")
     check(student.patch(f"/api/me/goals/{g.json()['id']}", json={"status": "achieved"}).json()["status"] == "achieved",
           "update study goal")
     r = student.post("/api/me/requests", json={"kind": "correction", "subject": "Attendance week 7",
-                                               "details": "I was present on Monday", "target_record": "SE331 week 7"})
+                                               "details": "I was present on Monday", "target_record": "SSC-MATH week 7"})
     assignee = r.json().get("assigned_to") or {}
     check(r.status_code == 201 and assignee.get("id") == (me["advisor"] or {}).get("id"),
           f"correction request routed to the student's advisor ({assignee.get('full_name')})")
@@ -181,7 +181,7 @@ def main() -> int:
     b = r.json()
     check(b["status"] == "rejected" and len(b["errors"]) == 5, f"bad file rejected with {len(b['errors'])} line errors")
     check(admin.post(f"/api/imports/{b['id']}/commit").status_code == 409, "rejected batch cannot be committed")
-    good = (ROOT / "sample_data" / "example_attendance_week11_SE331.csv").read_bytes()
+    good = (ROOT / "sample_data" / "example_attendance_week11_SSC-MATH.csv").read_bytes()
     r = teacher.post("/api/imports/validate", data={"kind": "attendance"}, files={"file": ("good.csv", good, "text/csv")})
     check(r.json()["status"] == "validated", "teacher validates own-course file", r.text[:300])
     r = teacher.post(f"/api/imports/{r.json()['id']}/commit")

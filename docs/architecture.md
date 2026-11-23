@@ -38,7 +38,7 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-  A[Validated data: attendance · assessments · assignments · engagement · prior GPA] --> B[Feature extraction<br/>rates, recent-vs-earlier trends]
+  A[Validated data: attendance · class tests/exams · homework · online-portal activity · previous exam GPA] --> B[Feature extraction<br/>rates, recent-vs-earlier trends]
   B --> C{Completeness ≥ 60%?}
   C -- No --> X[Insufficient data<br/>no prediction shown]
   C -- Yes --> D{Model available?}
@@ -102,8 +102,8 @@ erDiagram
 
 | Role | Individual student records | Write actions | Reports |
 |---|---|---|---|
-| Teacher | Students enrolled in own courses | Review/flag alerts, approve recs, plans, interventions, import indicators for own courses | Own courses |
-| Advisor | Own advisees | Same as teacher (no imports) | Own advisees |
+| Teacher | Students enrolled in own subjects | Review/flag alerts, approve recs, plans, interventions, import indicators for own subjects | Own subjects |
+| Advisor (class advisor) | Students in own class group | Same as teacher (no imports) | Own students |
 | Student | Self only (no risk labels, approved support only) | Goals, help/correction requests | — |
 | Analyst | None | — | De-identified, small cells suppressed; identifiable export only if `identifiable_access` granted |
 | Admin | All (audited) | Users/roles, imports, recompute, retention | All |

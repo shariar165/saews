@@ -18,7 +18,7 @@ if (user) {
         <div id="result" style="margin-top:1rem" aria-live="polite"></div></section>
       <section class="card"><h2>How it works</h2><ol class="small">
         <li>Choose the data type and upload a CSV that matches the template columns.</li>
-        <li>The system checks required columns, data types, value ranges, duplicates, unknown students or courses, enrollment${user.role === "teacher" ? ", and that you teach the course" : ""}.</li>
+        <li>The system checks required columns, data types, value ranges, duplicates, unknown students or subjects, subject enrollment${user.role === "teacher" ? ", and that you teach the subject" : ""}.</li>
         <li>If there are no errors, review the summary and <strong>commit</strong>. Risk assessments for the affected students refresh in the background.</li>
         <li>Every upload is logged with its file fingerprint (SHA-256) for traceability.</li></ol></section>
     </div>

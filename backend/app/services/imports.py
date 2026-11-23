@@ -35,14 +35,14 @@ SPECS: dict[str, dict] = {
             "student_code": ("str", True, {"max": 40}),
             "full_name": ("str", True, {"max": 200}),
             "program": ("str", True, {"max": 120}),
-            "year_of_study": ("int", True, {"min": 1, "max": 8}),
-            "prior_gpa": ("float", False, {"min": 0, "max": 4}),
+            "year_of_study": ("int", True, {"min": 1, "max": 12}),  # class
+            "prior_gpa": ("float", False, {"min": 0, "max": 5}),  # previous exam GPA (5.00 scale)
             "advisor_email": ("str", False, {"max": 255}),
         },
         "key": ["student_code"],
     },
     "enrollments": {
-        "label": "Enrollments",
+        "label": "Subject enrollments",
         "roles": [Role.ADMIN],
         "columns": {"student_code": ("str", True, {}), "course_code": ("str", True, {})},
         "key": ["student_code", "course_code"],
@@ -58,7 +58,7 @@ SPECS: dict[str, dict] = {
         "key": ["student_code", "course_code", "date"],
     },
     "assessments": {
-        "label": "Assessment scores",
+        "label": "Class test / exam scores",
         "roles": [Role.ADMIN, Role.TEACHER],
         "columns": {
             "student_code": ("str", True, {}), "course_code": ("str", True, {}),
@@ -69,7 +69,7 @@ SPECS: dict[str, dict] = {
         "key": ["student_code", "course_code", "assessment_name"],
     },
     "assignments": {
-        "label": "Assignment submissions",
+        "label": "Homework submissions",
         "roles": [Role.ADMIN, Role.TEACHER],
         "columns": {
             "student_code": ("str", True, {}), "course_code": ("str", True, {}),
@@ -80,7 +80,7 @@ SPECS: dict[str, dict] = {
         "key": ["student_code", "course_code", "assignment_name"],
     },
     "engagement": {
-        "label": "Learning-platform engagement (weekly)",
+        "label": "Online learning portal activity (weekly)",
         "roles": [Role.ADMIN, Role.TEACHER],
         "columns": {
             "student_code": ("str", True, {}), "course_code": ("str", True, {}),

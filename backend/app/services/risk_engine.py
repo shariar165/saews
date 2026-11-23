@@ -29,10 +29,10 @@ log = logging.getLogger("saews.risk")
 LEVEL_ORDER = {"low": 0, "moderate": 1, "high": 2, "critical": 3}
 GROUP_LABEL = {
     "attendance": "attendance records",
-    "assessments": "assessment scores",
-    "assignments": "assignment submissions",
-    "engagement": "learning-platform engagement",
-    "prior_gpa": "prior GPA",
+    "assessments": "class test / exam scores",
+    "assignments": "homework submissions",
+    "engagement": "online learning portal activity",
+    "prior_gpa": "previous exam GPA",
 }
 
 

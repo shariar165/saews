@@ -15,7 +15,7 @@ if (user) {
     <section class="card mt"><div class="card-head"><h2>Request inbox</h2>
       <div class="field"><label for="r-status">Status</label><select id="r-status"><option value="">All</option><option value="open" selected>Open</option>
         <option value="in_review">In review</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option></select></div></div>
-      <p class="small muted">Requests are routed to the student's advisor (or a course teacher). Corrections must be checked against the source record.</p>
+      <p class="small muted">Requests are routed to the student's class advisor (or a subject teacher). Corrections must be checked against the source record.</p>
       <ul class="list" id="requests"></ul></section>`;
 
   async function loadPlans() {

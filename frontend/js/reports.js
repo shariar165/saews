@@ -15,11 +15,11 @@ if (user) {
       ${canIdent ? `<button class="btn" id="exp-i" type="button">Export identifiable CSV</button>` : ""}</div></div>
     ${s.deidentified ? `<div class="notice">You are viewing aggregate, de-identified information only. Identifiable details need separate authorization.</div>` : ""}
     <div class="grid grid-2">
-      <section class="card"><h2>Risk levels by program</h2><div class="chart-box"><canvas id="c-prog" role="img" aria-label="Stacked bar chart of risk levels by program"></canvas></div></section>
-      <section class="card"><h2>Weekly attendance by course</h2><div class="chart-box"><canvas id="c-att" role="img" aria-label="Line chart of weekly attendance rate by course"></canvas></div></section>
+      <section class="card"><h2>Risk levels by class group</h2><div class="chart-box"><canvas id="c-prog" role="img" aria-label="Stacked bar chart of risk levels by class group"></canvas></div></section>
+      <section class="card"><h2>Weekly attendance by subject</h2><div class="chart-box"><canvas id="c-att" role="img" aria-label="Line chart of weekly attendance rate by subject"></canvas></div></section>
     </div>
-    <section class="card mt"><h2>Risk levels by course</h2><div class="table-wrap"><table>
-      <thead><tr><th>Course</th>${LV.map((l) => `<th class="num">${levelLabel(l)}</th>`).join("")}</tr></thead>
+    <section class="card mt"><h2>Risk levels by subject</h2><div class="table-wrap"><table>
+      <thead><tr><th>Subject</th>${LV.map((l) => `<th class="num">${levelLabel(l)}</th>`).join("")}</tr></thead>
       <tbody>${Object.entries(s.by_course).map(([c, v]) => `<tr><td><strong>${esc(c)}</strong> <span class="small muted">${esc(v.title)}</span></td>
         ${LV.map((l) => `<td class="num">${show(v.counts[l])}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>
     <div class="grid grid-3 mt">

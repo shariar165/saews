@@ -65,7 +65,7 @@ def _upload(c, kind: str, csv_text: str, name: str = "data.csv"):
 
 def test_at02_missing_columns_rejected(as_role, db):
     c = as_role("admin@saews.demo")
-    r = _upload(c, "attendance", "student_code,course_code,date\nS20260001,SE331,2026-10-01\n")
+    r = _upload(c, "attendance", "student_code,course_code,date\nS20260001,SSC-MATH,2026-10-01\n")
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "rejected"
@@ -231,7 +231,7 @@ def test_students_only_see_approved_recommendations(as_role, db):
 def test_at07_correction_request_logged_and_routed(as_role, db):
     c = as_role("student@saews.demo")
     r = c.post("/api/me/requests", json={"kind": "correction", "subject": "Wrong attendance",
-                                         "details": "I attended SE331 in week 7", "target_record": "SE331 week 7"})
+                                         "details": "I attended SSC-MATH in week 7", "target_record": "SSC-MATH week 7"})
     assert r.status_code == 201, r.text
     req_id = r.json()["id"]
     db.expire_all()

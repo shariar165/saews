@@ -4,6 +4,8 @@ Capstone prototype for **SE331 – Software Engineering Design & Capstone Projec
 It implements the system specified in the team's SRS: it helps authorized teachers and advisors notice
 students who may need timely support, explains *why*, suggests supportive (never punitive) actions
 for staff to review, and tracks follow-up, with privacy, audit and fairness safeguards built in.
+The demo data models a **Bangladeshi school and college**: SSC students (Class 9–10) and HSC students
+(Class 11–12) in the Science, Business Studies and Humanities groups, with GPA on the 5.00 scale.
 
 > **Model outputs are estimates, not facts.** The system assists human decision-makers. It never makes grading,
 > disciplinary, admission or eligibility decisions, and no action is triggered automatically.
@@ -72,22 +74,22 @@ To activate the venv in your shell instead: `.\.venv\Scripts\Activate.ps1`
 
 | Role | Email | Sees |
 |---|---|---|
-| Teacher | `teacher1@saews.demo` | Students in SE331, SE221, CSE311, CSE331 |
-| Teacher | `teacher2@saews.demo` | Students in CSE215, MAT211, BUS101, ACC201, ENG101 |
-| Advisor | `advisor1@saews.demo` | Software Engineering advisees |
-| Advisor | `advisor2@saews.demo` | CS and BBA advisees |
+| Teacher | `teacher1@saews.demo` | Students in Mathematics, Physics, Chemistry and Accounting (SSC-MATH, SSC-PHY, SSC-CHEM, SSC-ACC, HSC-PHY, HSC-CHEM, HSC-ACC) |
+| Teacher | `teacher2@saews.demo` | Students in Bangla, English, ICT, Business and Humanities subjects (SSC-BAN, SSC-ENG, SSC-FIN, SSC-HIST, SSC-GEO, HSC-BAN, HSC-ENG, HSC-ICT, HSC-BOM, HSC-CIV, HSC-ECO) |
+| Advisor | `advisor1@saews.demo` | Class advisor for school students (Class 9–10) |
+| Advisor | `advisor2@saews.demo` | Class advisor for college students (Class 11–12) |
 | Student | `student@saews.demo` | Own progress, approved support, goals, requests |
 | Analyst | `analyst@saews.demo` | Aggregate, de-identified reports only |
 | Admin | `admin@saews.demo` | Users/roles, imports, model monitor, audit log, retention |
 
-Interesting seeded cases: **S20260001** (the demo student, declining after mid-term → high risk),
+Interesting seeded cases: **S20260001** (the demo student, declining after the mid-term exam → high risk),
 **S20260002** (enrolled, no data → *Insufficient data*), **S20260003** (data stops at week 4 → *stale, provisional*).
 
 ### Suggested demo walkthrough
 1. `teacher1` → Dashboard → open a High/Critical alert → read the factors → **Approve** a suggestion (creates a plan) → record an intervention → record its outcome.
 2. `student` → My Progress → see the approved plan → submit **Request a correction**.
 3. `advisor1` → Support & Requests → resolve the correction request.
-4. `admin` → Data Import → upload `sample_data/example_with_errors_attendance.csv` (rejected with line-level errors), then `example_attendance_week11_SE331.csv` (validate → commit → background re-assessment) → Administration → audit log / model monitor.
+4. `admin` → Data Import → upload `sample_data/example_with_errors_attendance.csv` (rejected with line-level errors), then `example_attendance_week11_SSC-MATH.csv` (validate → commit → background re-assessment) → Administration → audit log / model monitor.
 5. `analyst` → Reports → only suppressed, de-identified figures; identifiable export is refused and audited.
 
 ## Tests & quality

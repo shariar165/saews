@@ -4,17 +4,17 @@ import { $, emptyRow, esc, initShell, methodTag, personCell, qualityTag, riskBad
 const user = await initShell("students.html", ["admin", "teacher", "advisor"]);
 if (user) {
   $("#main").innerHTML = `
-    <div class="page-head"><div><h1>Students</h1><p>Students you are authorized to view${user.role === "teacher" ? " (enrolled in your courses)" : user.role === "advisor" ? " (your advisees)" : ""}.</p></div></div>
+    <div class="page-head"><div><h1>Students</h1><p>Students you are authorized to view${user.role === "teacher" ? " (enrolled in your subjects)" : user.role === "advisor" ? " (students you advise as class advisor)" : ""}.</p></div></div>
     <form class="toolbar card" id="filters" role="search">
       <div class="field" style="flex:2"><label for="q">Search</label><input id="q" type="search" placeholder="Name or student ID"></div>
       <div class="field"><label for="level">Risk level</label><select id="level"><option value="">Any</option>
         <option value="critical">Critical</option><option value="high">High</option><option value="moderate">Moderate</option>
         <option value="low">Low</option><option value="insufficient_data">Insufficient data</option></select></div>
-      <div class="field"><label for="program">Program</label><select id="program"><option value="">Any</option></select></div>
+      <div class="field"><label for="program">Class group</label><select id="program"><option value="">Any</option></select></div>
       <button class="btn" type="submit">Apply</button>
     </form>
     <section class="card"><div class="card-head"><h2 id="count">Students</h2></div>
-      <div class="table-wrap"><table><thead><tr><th>Student</th><th>Program</th><th class="num">Year</th><th>Risk</th><th>Source / data</th><th>Advisor</th></tr></thead>
+      <div class="table-wrap"><table><thead><tr><th>Student</th><th>Class group</th><th class="num">Class</th><th>Risk</th><th>Source / data</th><th>Class advisor</th></tr></thead>
       <tbody id="rows"></tbody></table></div></section>`;
 
   let programsLoaded = false;

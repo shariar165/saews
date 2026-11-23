@@ -8,27 +8,27 @@ if (user) {
   $("#main").innerHTML = `
     <section class="welcome"><p class="eyebrow">${esc(todayLong())}</p>
       <h1>Hello, ${esc(profile.full_name.split(" ")[0])} 👋</h1>
-      <p>${esc(profile.student_code)} · ${esc(profile.program)} · Year ${profile.year_of_study} · Advisor: ${esc(profile.advisor?.full_name || "—")}</p></section>
-    <div class="notice">This page shows your own progress and the support your teachers and advisor have agreed with you.
+      <p>${esc(profile.student_code)} · ${esc(profile.program)} · Class ${profile.year_of_study} · Class advisor: ${esc(profile.advisor?.full_name || "—")}</p></section>
+    <div class="notice">This page shows your own progress and the support your teachers and class advisor have agreed with you.
       If anything looks wrong, use <em>Request a correction</em> below and it will be checked.</div>
     <div class="grid grid-main">
       <div class="stack">
         <section class="card"><h2>My progress</h2><div class="grid grid-2">
           <div><h3>Weekly attendance</h3><div class="chart-box short"><canvas id="c-att" role="img" aria-label="My weekly attendance"></canvas></div></div>
-          <div><h3>Assessment scores</h3><div class="chart-box short"><canvas id="c-sc" role="img" aria-label="My assessment scores"></canvas></div></div></div>
+          <div><h3>Class test &amp; exam scores</h3><div class="chart-box short"><canvas id="c-sc" role="img" aria-label="My class test and exam scores"></canvas></div></div></div>
           <p class="small" id="asg"></p></section>
         <section class="card"><h2>My support plan</h2><div id="support"></div></section>
       </div>
       <div class="stack">
         <section class="card"><h2>My study goals</h2><ul class="list" id="goals"></ul>
           <form id="goal-form" class="row" style="margin-top:.6rem;align-items:flex-end">
-            <div class="field" style="flex:2"><label for="g-title">New goal</label><input id="g-title" required minlength="3" maxlength="200" placeholder="e.g. Submit all assignments on time"></div>
+            <div class="field" style="flex:2"><label for="g-title">New goal</label><input id="g-title" required minlength="3" maxlength="200" placeholder="e.g. Submit all homework on time"></div>
             <div class="field"><label for="g-date">Target date</label><input id="g-date" type="date"></div>
             <button class="btn small" type="submit">Add</button></form></section>
         <section class="card"><h2>Ask for help or a correction</h2><form id="req-form">
           <div class="field"><label for="r-kind">Type</label><select id="r-kind"><option value="help">I would like help or support</option><option value="correction">A record about me looks incorrect</option></select></div>
           <div class="field"><label for="r-subject">Subject</label><input id="r-subject" required minlength="3" maxlength="200"></div>
-          <div class="field" id="r-target-wrap" hidden><label for="r-target">Which record? (course, week, assessment)</label><input id="r-target" maxlength="200" placeholder="e.g. SE331 attendance, week 7"></div>
+          <div class="field" id="r-target-wrap" hidden><label for="r-target">Which record? (subject, week, class test / exam)</label><input id="r-target" maxlength="200" placeholder="e.g. SSC-MATH attendance, week 7"></div>
           <div class="field"><label for="r-details">Details</label><textarea id="r-details" required minlength="5" maxlength="4000"></textarea></div>
           <div class="actions"><button class="btn" type="submit">Send request</button></div></form>
           <h3>My requests</h3><ul class="list" id="reqs"></ul></section>
@@ -40,7 +40,7 @@ if (user) {
   const names = [...new Set(d.scores.map((s) => s.name))], courses = [...new Set(d.scores.map((s) => s.course))];
   line($("#c-sc"), names, courses.map((c) => ({ label: c, data: names.map((n) => d.scores.find((s) => s.course === c && s.name === n)?.pct ?? null) })), { yMax: 100, yFormat: (v) => `${v}%` });
   const a = d.assignments;
-  $("#asg").textContent = `Assignments: ${a.on_time} on time, ${a.late} late, ${a.missing} missing.`;
+  $("#asg").textContent = `Homework: ${a.on_time} on time, ${a.late} late, ${a.missing} missing.`;
 
   async function loadSupport() {
     const s = await api("/me/support");

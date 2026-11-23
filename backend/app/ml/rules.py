@@ -24,12 +24,12 @@ RULES: list[Rule] = [
     Rule("attendance_rate", "<", 0.70, 2, "LOW_ATTENDANCE", "Attendance is below 70%"),
     Rule("attendance_rate", "<", 0.80, 1, "LOW_ATTENDANCE", "Attendance is below 80%"),
     Rule("attendance_trend", "<=", -0.15, 1, "LOW_ATTENDANCE", "Attendance dropped by 15+ points recently"),
-    Rule("avg_score", "<", 50, 2, "LOW_SCORES", "Average assessment score is below 50%"),
-    Rule("avg_score", "<", 60, 1, "LOW_SCORES", "Average assessment score is below 60%"),
+    Rule("avg_score", "<", 50, 2, "LOW_SCORES", "Average class test / exam score is below 50%"),
+    Rule("avg_score", "<", 60, 1, "LOW_SCORES", "Average class test / exam score is below 60%"),
     Rule("score_trend", "<=", -10, 1, "LOW_SCORES", "Recent scores fell by 10+ points"),
-    Rule("missing_rate", ">=", 0.40, 2, "MISSING_WORK", "40% or more of assignments are missing"),
-    Rule("missing_rate", ">=", 0.20, 1, "MISSING_WORK", "20% or more of assignments are missing"),
-    Rule("engagement_change", "<=", -0.50, 1, "LOW_ENGAGEMENT", "Learning-platform activity halved recently"),
+    Rule("missing_rate", ">=", 0.40, 2, "MISSING_WORK", "40% or more of homework is missing"),
+    Rule("missing_rate", ">=", 0.20, 1, "MISSING_WORK", "20% or more of homework is missing"),
+    Rule("engagement_change", "<=", -0.50, 1, "LOW_ENGAGEMENT", "Online learning portal activity halved recently"),
 ]
 
 # Only the most severe rule per (feature, op) family counts — e.g. <70% supersedes <80%.

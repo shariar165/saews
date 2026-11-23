@@ -71,7 +71,7 @@ def test_rules_engine_levels_and_no_double_counting():
 
 
 def test_explanations_are_plain_language():
-    assert describe("attendance_rate", 0.64) == "Attendance is 64% across enrolled courses"
+    assert describe("attendance_rate", 0.64) == "Attendance is 64% across enrolled subjects"
     assert "−" not in describe("attendance_trend", -0.2) and "-20" in describe("attendance_trend", -0.2)
     assert describe("avg_score", None).endswith("no data")
 

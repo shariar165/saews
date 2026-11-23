@@ -6,10 +6,10 @@ from ..ml.model import model_status
 router = APIRouter(tags=["meta"])
 
 DEMO_ACCOUNTS = [
-    {"role": "teacher", "email": "teacher1@saews.demo", "note": "Teaches SE331, SE221, CSE311, CSE331 (SE & CS students)"},
-    {"role": "teacher", "email": "teacher2@saews.demo", "note": "Teaches CSE215, MAT211, BUS101, ACC201, ENG101"},
-    {"role": "advisor", "email": "advisor1@saews.demo", "note": "Advises SE students"},
-    {"role": "advisor", "email": "advisor2@saews.demo", "note": "Advises CS and BBA students"},
+    {"role": "teacher", "email": "teacher1@saews.demo", "note": "Teaches Mathematics, Science & Accounting (SSC + HSC)"},
+    {"role": "teacher", "email": "teacher2@saews.demo", "note": "Teaches Bangla, English, ICT, Business & Humanities (SSC + HSC)"},
+    {"role": "advisor", "email": "advisor1@saews.demo", "note": "Class advisor for school students (Class 9–10)"},
+    {"role": "advisor", "email": "advisor2@saews.demo", "note": "Class advisor for college students (Class 11–12)"},
     {"role": "student", "email": "student@saews.demo", "note": "Student portal"},
     {"role": "analyst", "email": "analyst@saews.demo", "note": "Aggregate, de-identified view"},
     {"role": "admin", "email": "admin@saews.demo", "note": "Users, imports, model, audit"},

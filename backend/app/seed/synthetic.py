@@ -1,7 +1,7 @@
-"""Synthetic institution generator.
+"""Synthetic school & college generator (Bangladesh: SSC Class 9-10, HSC Class 11-12).
 
 All data is fictional. A latent "difficulty" variable drives attendance, scores,
-submissions and engagement, and ~15% of students "decline" after mid-term — the
+submissions and engagement, and ~15% of students "decline" after the mid-term exam — the
 kind of pattern an early-warning system should surface. The historical cohort also
 carries an end-of-term outcome label (fail/withdraw) used only for model training.
 """
@@ -14,24 +14,45 @@ from datetime import date, timedelta
 import numpy as np
 import pandas as pd
 
+# Bangladeshi school (SSC, Class 9-10) and college (HSC, Class 11-12) groups -> subject sections.
 PROGRAMS = {
-    "BSc Software Engineering": ["SE331", "SE221", "CSE215", "MAT211"],
-    "BSc Computer Science": ["CSE215", "CSE311", "CSE331", "MAT211"],
-    "BBA": ["BUS101", "ACC201", "MAT211", "ENG101"],
+    "School - Science": ["SSC-BAN", "SSC-ENG", "SSC-MATH", "SSC-PHY", "SSC-CHEM"],
+    "School - Business Studies": ["SSC-BAN", "SSC-ENG", "SSC-MATH", "SSC-ACC", "SSC-FIN"],
+    "School - Humanities": ["SSC-BAN", "SSC-ENG", "SSC-MATH", "SSC-HIST", "SSC-GEO"],
+    "College - Science": ["HSC-BAN", "HSC-ENG", "HSC-ICT", "HSC-PHY", "HSC-CHEM"],
+    "College - Business Studies": ["HSC-BAN", "HSC-ENG", "HSC-ICT", "HSC-ACC", "HSC-BOM"],
+    "College - Humanities": ["HSC-BAN", "HSC-ENG", "HSC-ICT", "HSC-CIV", "HSC-ECO"],
 }
-PROGRAM_WEIGHTS = [0.45, 0.35, 0.20]
+PROGRAM_WEIGHTS = [0.22, 0.15, 0.13, 0.20, 0.17, 0.13]
+# Classes that belong to each level (School = SSC, College = HSC).
+LEVEL_CLASSES = {"School": (9, 10), "College": (11, 12)}
 
 COURSES = {
-    "SE331": "Software Engineering Design & Capstone Project",
-    "SE221": "Software Requirements Engineering",
-    "CSE215": "Data Structures",
-    "CSE311": "Database Systems",
-    "CSE331": "Computer Networks",
-    "MAT211": "Discrete Mathematics",
-    "BUS101": "Principles of Management",
-    "ACC201": "Financial Accounting",
-    "ENG101": "Academic English",
+    "SSC-BAN": "Bangla (SSC)",
+    "SSC-ENG": "English (SSC)",
+    "SSC-MATH": "General Mathematics (SSC)",
+    "SSC-PHY": "Physics (SSC)",
+    "SSC-CHEM": "Chemistry (SSC)",
+    "SSC-ACC": "Accounting (SSC)",
+    "SSC-FIN": "Finance & Banking (SSC)",
+    "SSC-HIST": "History of Bangladesh & World Civilisation (SSC)",
+    "SSC-GEO": "Geography & Environment (SSC)",
+    "HSC-BAN": "Bangla (HSC)",
+    "HSC-ENG": "English (HSC)",
+    "HSC-ICT": "Information & Communication Technology (HSC)",
+    "HSC-PHY": "Physics (HSC)",
+    "HSC-CHEM": "Chemistry (HSC)",
+    "HSC-ACC": "Accounting (HSC)",
+    "HSC-BOM": "Business Organisation & Management (HSC)",
+    "HSC-CIV": "Civics & Good Governance (HSC)",
+    "HSC-ECO": "Economics (HSC)",
 }
+
+
+def level_of(program: str) -> str:
+    """'School' or 'College' for a group name such as 'College - Science'."""
+    return program.split(" - ", 1)[0]
+
 
 FIRST = [
     "Aarav", "Nusrat", "Tanvir", "Farhana", "Rafi", "Mim", "Sabbir", "Tasnim", "Imran", "Sadia",
@@ -43,8 +64,8 @@ LAST = [
     "Mahmud", "Alam", "Begum", "Khan", "Das", "Roy", "Saha", "Mondal", "Talukder", "Bhuiyan",
 ]
 
-QUIZ_WEEKS = {"Quiz 1": (3, 20), "Quiz 2": (6, 20), "Midterm": (7, 50), "Quiz 3": (9, 20)}
-ASSIGNMENT_WEEKS = {f"Assignment {i}": w for i, w in enumerate([2, 4, 6, 8, 10], start=1)}
+QUIZ_WEEKS = {"Class Test 1": (3, 20), "Class Test 2": (6, 20), "Mid-Term Exam": (7, 50), "Class Test 3": (9, 20)}
+ASSIGNMENT_WEEKS = {f"Homework {i}": w for i, w in enumerate([2, 4, 6, 8, 10], start=1)}
 
 
 def _sigmoid(x):
@@ -89,8 +110,11 @@ def generate_cohort(
     equity = np.where(rng.random(n_students) < 0.35, "B", "A")
     z = rng.normal(0, 1, n_students) + np.where(equity == "B", 0.15, 0.0)
     decliner = rng.random(n_students) < 0.15
-    year = rng.integers(1, 5, n_students)
-    gpa = np.clip(3.1 - 0.45 * z + rng.normal(0, 0.3, n_students), 1.0, 4.0).round(2)
+    # Class within the level: School -> 9 or 10, College -> 11 or 12.
+    second_year = rng.random(n_students) < 0.5
+    year = np.array([LEVEL_CLASSES[level_of(p)][int(b)] for p, b in zip(programs, second_year, strict=True)])
+    # Previous exam GPA on the Bangladeshi 5.00 scale (for college students: their SSC GPA).
+    gpa = np.clip(4.1 - 0.55 * z + rng.normal(0, 0.35, n_students), 1.0, 5.0).round(2)
 
     students, enr, att, sc, asg, eng = [], [], [], [], [], []
     for i in range(n_students):

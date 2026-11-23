@@ -32,8 +32,8 @@ async function render() {
     <p class="small" style="margin:0 0 .75rem"><a class="back-link" href="students.html">${icon("arrowLeft")} Students</a></p>
     <section class="card profile-card">${avatar(st.full_name, "lg")}
       <div class="who"><h1>${esc(st.full_name)}</h1>
-        <div class="chips"><span class="chip">${icon("user")}${esc(st.student_code)}</span><span class="chip">${icon("graduation")}${esc(st.program)} · Year ${st.year_of_study}</span>
-          <span class="chip">${icon("support")}Advisor: ${esc(st.advisor?.full_name || "—")}</span></div>
+        <div class="chips"><span class="chip">${icon("user")}${esc(st.student_code)}</span><span class="chip">${icon("graduation")}${esc(st.program)} · Class ${st.year_of_study}</span>
+          <span class="chip">${icon("support")}Class advisor: ${esc(st.advisor?.full_name || "—")}</span></div>
         <div class="chips"><span class="small muted">Courses:</span> ${st.courses.map((c) => `<span class="tag" title="${esc(c.title)} — ${esc(c.teacher || "")}">${esc(c.code)}</span>`).join(" ")}</div></div>
       <button class="btn secondary" id="reassess" type="button">${icon("refresh")}Re-assess now</button></section>
     <div class="grid grid-main">
@@ -42,9 +42,9 @@ async function render() {
         <section class="card"><h2>Progress indicators</h2>
           <div class="grid grid-2">
             <div><h3>Weekly attendance</h3><div class="chart-box short"><canvas id="c-att" role="img" aria-label="Weekly attendance rate"></canvas></div></div>
-            <div><h3>Learning-platform logins (per course, weekly)</h3><div class="chart-box short"><canvas id="c-eng" role="img" aria-label="Weekly logins"></canvas></div></div>
+            <div><h3>Online learning portal logins (per subject, weekly)</h3><div class="chart-box short"><canvas id="c-eng" role="img" aria-label="Weekly logins"></canvas></div></div>
           </div>
-          <h3>Assessment scores</h3><div class="chart-box short"><canvas id="c-sc" role="img" aria-label="Assessment scores by course"></canvas></div>
+          <h3>Class test &amp; exam scores</h3><div class="chart-box short"><canvas id="c-sc" role="img" aria-label="Class test and exam scores by subject"></canvas></div>
           <p class="small" id="asg-summary"></p></section>
         <section class="card"><h2>Assessment history</h2><div class="table-wrap"><table>
           <thead><tr><th>Assessed</th><th>Risk</th><th class="num">Likelihood</th><th>Source</th><th>Model</th><th>Review</th></tr></thead>
@@ -109,7 +109,7 @@ function renderAssessment(a) {
       <dt>Data completeness</dt><dd>${pct(a.completeness)}</dd>
       ${a.review_note ? `<dt>Review note</dt><dd>${esc(a.review_note)}</dd>` : ""}
     </dl>
-    <p class="disclaimer">This is an estimate, not a fact. Confirm with the student and course context before acting. It must not be used for grading, discipline or eligibility decisions.</p>
+    <p class="disclaimer">This is an estimate, not a fact. Confirm with the student and subject teachers before acting. It must not be used for grading, discipline or eligibility decisions.</p>
     <div class="actions">
       <details class="inline-form" style="flex:1"><summary>Mark as reviewed</summary>
         <form id="review-form"><div class="field"><label for="r-note">Note (optional)</label><textarea id="r-note" maxlength="2000"></textarea></div>
@@ -143,7 +143,7 @@ async function loadIndicators() {
   line($("#c-sc"), names, courses.map((c) => ({ label: c, data: names.map((n) => d.scores.find((s) => s.course === c && s.name === n)?.pct ?? null) })),
     { yMax: 100, yFormat: (v) => `${v}%` });
   const a = d.assignments, total = a.on_time + a.late + a.missing;
-  $("#asg-summary").textContent = total ? `Assignments: ${a.on_time} on time, ${a.late} late, ${a.missing} missing (of ${total}).` : "No assignment data.";
+  $("#asg-summary").textContent = total ? `Homework: ${a.on_time} on time, ${a.late} late, ${a.missing} missing (of ${total}).` : "No homework data.";
 }
 
 async function loadHistory() {

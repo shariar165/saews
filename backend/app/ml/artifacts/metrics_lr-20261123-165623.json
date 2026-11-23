@@ -1,0 +1,292 @@
+{
+  "metrics": {
+    "alert_threshold": 0.2,
+    "thresholds": {
+      "moderate": 0.2,
+      "high": 0.4,
+      "critical": 0.65
+    },
+    "model_at_alert_threshold": {
+      "n": 375,
+      "base_rate": 0.2133,
+      "tp": 59,
+      "fp": 78,
+      "fn": 21,
+      "tn": 217,
+      "precision": 0.4307,
+      "recall": 0.7375,
+      "fpr": 0.2644,
+      "fnr": 0.2625,
+      "flag_rate": 0.3653,
+      "roc_auc": 0.8283,
+      "brier": 0.1273
+    },
+    "model_at_high_threshold": {
+      "n": 375,
+      "base_rate": 0.2133,
+      "tp": 41,
+      "fp": 36,
+      "fn": 39,
+      "tn": 259,
+      "precision": 0.5325,
+      "recall": 0.5125,
+      "fpr": 0.122,
+      "fnr": 0.4875,
+      "flag_rate": 0.2053,
+      "roc_auc": 0.8283,
+      "brier": 0.1273
+    },
+    "rule_baseline": {
+      "n": 375,
+      "base_rate": 0.2133,
+      "tp": 52,
+      "fp": 57,
+      "fn": 28,
+      "tn": 238,
+      "precision": 0.4771,
+      "recall": 0.65,
+      "fpr": 0.1932,
+      "fnr": 0.35,
+      "flag_rate": 0.2907
+    },
+    "calibration": [
+      {
+        "bin": "0.0-0.2",
+        "n": 238,
+        "mean_predicted": 0.0822,
+        "observed_rate": 0.0882
+      },
+      {
+        "bin": "0.2-0.4",
+        "n": 60,
+        "mean_predicted": 0.2987,
+        "observed_rate": 0.3
+      },
+      {
+        "bin": "0.4-0.6",
+        "n": 36,
+        "mean_predicted": 0.4988,
+        "observed_rate": 0.3611
+      },
+      {
+        "bin": "0.6-0.8",
+        "n": 22,
+        "mean_predicted": 0.6813,
+        "observed_rate": 0.5
+      },
+      {
+        "bin": "0.8-1.0",
+        "n": 19,
+        "mean_predicted": 0.8951,
+        "observed_rate": 0.8947
+      }
+    ],
+    "coefficients": {
+      "attendance_rate": 0.0608,
+      "attendance_trend": -0.0635,
+      "avg_score": -0.4367,
+      "score_trend": -0.0488,
+      "missing_rate": 0.404,
+      "late_rate": 0.1826,
+      "engagement_change": -0.0631,
+      "avg_logins": -0.6127,
+      "prior_gpa": -0.0445
+    },
+    "training": {
+      "n_train": 1125,
+      "n_test": 375,
+      "data": "synthetic historical cohort (fictional) \u2014 replace with approved institutional data"
+    }
+  },
+  "fairness": {
+    "program": {
+      "groups": {
+        "College - Business Studies": {
+          "n": 65,
+          "base_rate": 0.3077,
+          "tp": 17,
+          "fp": 13,
+          "fn": 3,
+          "tn": 32,
+          "precision": 0.5667,
+          "recall": 0.85,
+          "fpr": 0.2889,
+          "fnr": 0.15,
+          "flag_rate": 0.4615,
+          "sufficient_sample": true
+        },
+        "College - Humanities": {
+          "n": 51,
+          "base_rate": 0.2745,
+          "tp": 8,
+          "fp": 8,
+          "fn": 6,
+          "tn": 29,
+          "precision": 0.5,
+          "recall": 0.5714,
+          "fpr": 0.2162,
+          "fnr": 0.4286,
+          "flag_rate": 0.3137,
+          "sufficient_sample": true
+        },
+        "College - Science": {
+          "n": 68,
+          "base_rate": 0.2353,
+          "tp": 11,
+          "fp": 14,
+          "fn": 5,
+          "tn": 38,
+          "precision": 0.44,
+          "recall": 0.6875,
+          "fpr": 0.2692,
+          "fnr": 0.3125,
+          "flag_rate": 0.3676,
+          "sufficient_sample": true
+        },
+        "School - Business Studies": {
+          "n": 66,
+          "base_rate": 0.2273,
+          "tp": 12,
+          "fp": 13,
+          "fn": 3,
+          "tn": 38,
+          "precision": 0.48,
+          "recall": 0.8,
+          "fpr": 0.2549,
+          "fnr": 0.2,
+          "flag_rate": 0.3788,
+          "sufficient_sample": true
+        },
+        "School - Humanities": {
+          "n": 46,
+          "base_rate": 0.1087,
+          "tp": 4,
+          "fp": 13,
+          "fn": 1,
+          "tn": 28,
+          "precision": 0.2353,
+          "recall": 0.8,
+          "fpr": 0.3171,
+          "fnr": 0.2,
+          "flag_rate": 0.3696,
+          "sufficient_sample": true
+        },
+        "School - Science": {
+          "n": 79,
+          "base_rate": 0.1266,
+          "tp": 7,
+          "fp": 17,
+          "fn": 3,
+          "tn": 52,
+          "precision": 0.2917,
+          "recall": 0.7,
+          "fpr": 0.2464,
+          "fnr": 0.3,
+          "flag_rate": 0.3038,
+          "sufficient_sample": true
+        }
+      },
+      "recall_gap": 0.2786,
+      "fpr_gap": 0.1009,
+      "needs_review": true
+    },
+    "year_of_study": {
+      "groups": {
+        "9": {
+          "n": 103,
+          "base_rate": 0.165,
+          "tp": 15,
+          "fp": 28,
+          "fn": 2,
+          "tn": 58,
+          "precision": 0.3488,
+          "recall": 0.8824,
+          "fpr": 0.3256,
+          "fnr": 0.1176,
+          "flag_rate": 0.4175,
+          "sufficient_sample": true
+        },
+        "10": {
+          "n": 88,
+          "base_rate": 0.1477,
+          "tp": 8,
+          "fp": 15,
+          "fn": 5,
+          "tn": 60,
+          "precision": 0.3478,
+          "recall": 0.6154,
+          "fpr": 0.2,
+          "fnr": 0.3846,
+          "flag_rate": 0.2614,
+          "sufficient_sample": true
+        },
+        "11": {
+          "n": 83,
+          "base_rate": 0.2892,
+          "tp": 19,
+          "fp": 11,
+          "fn": 5,
+          "tn": 48,
+          "precision": 0.6333,
+          "recall": 0.7917,
+          "fpr": 0.1864,
+          "fnr": 0.2083,
+          "flag_rate": 0.3614,
+          "sufficient_sample": true
+        },
+        "12": {
+          "n": 101,
+          "base_rate": 0.2574,
+          "tp": 17,
+          "fp": 24,
+          "fn": 9,
+          "tn": 51,
+          "precision": 0.4146,
+          "recall": 0.6538,
+          "fpr": 0.32,
+          "fnr": 0.3462,
+          "flag_rate": 0.4059,
+          "sufficient_sample": true
+        }
+      },
+      "recall_gap": 0.267,
+      "fpr_gap": 0.1392,
+      "needs_review": true
+    },
+    "equity_group": {
+      "groups": {
+        "A": {
+          "n": 230,
+          "base_rate": 0.2217,
+          "tp": 35,
+          "fp": 46,
+          "fn": 16,
+          "tn": 133,
+          "precision": 0.4321,
+          "recall": 0.6863,
+          "fpr": 0.257,
+          "fnr": 0.3137,
+          "flag_rate": 0.3522,
+          "sufficient_sample": true
+        },
+        "B": {
+          "n": 145,
+          "base_rate": 0.2,
+          "tp": 24,
+          "fp": 32,
+          "fn": 5,
+          "tn": 84,
+          "precision": 0.4286,
+          "recall": 0.8276,
+          "fpr": 0.2759,
+          "fnr": 0.1724,
+          "flag_rate": 0.3862,
+          "sufficient_sample": true
+        }
+      },
+      "recall_gap": 0.1413,
+      "fpr_gap": 0.0189,
+      "needs_review": true
+    }
+  }
+}
