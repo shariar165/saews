@@ -7,6 +7,11 @@ for staff to review, and tracks follow-up, with privacy, audit and fairness safe
 The demo data models a **Bangladeshi school and college**: SSC students (Class 9–10) and HSC students
 (Class 11–12) in the Science, Business Studies and Humanities groups, with GPA on the 5.00 scale.
 
+It uses AI in two separate ways:
+- a **predictive model** (logistic regression) that estimates which students may need support and explains why;
+- an optional **generative AI assistant** (Claude) that drafts plain-language summaries, suggestions,
+  notes, Bangla/English messages and study plans for people to review ([details](#ai-assistant-optional)).
+
 > **Model outputs are estimates, not facts.** The system assists human decision-makers. It never makes grading,
 > disciplinary, admission or eligibility decisions, and no action is triggered automatically.
 > All bundled data is **synthetic** (fictional students).
@@ -24,6 +29,17 @@ The [suggested walkthrough](#suggested-demo-walkthrough) works there too.
 - Vercel installs dependencies from `pyproject.toml` — keep it in sync with `requirements.txt` when adding packages.
 - The deployed app loads the model committed in `backend/app/ml/artifacts/`. After retraining, commit the new
   `registry.json`, `model_*.joblib` and `metrics_*.json` (`git add -f`, the folder is git-ignored) and push.
+- **Database changes:** if a commit adds an Alembic migration, apply it to Neon **before** pushing, or the live
+  site will query tables/columns that do not exist yet (run from Git Bash in the project folder):
+
+  ```bash
+  vercel env pull .env.neon --environment=production --yes && \
+  EWS_DATABASE_URL="$(grep '^DATABASE_URL_UNPOOLED=' .env.neon | cut -d= -f2- | tr -d '"')" \
+  .venv/Scripts/python.exe -m alembic upgrade head; rm -f .env.neon
+  ```
+- **AI assistant on the live demo:** currently **off** (no API key configured), so the AI buttons are hidden.
+  To turn it on: `vercel env add ANTHROPIC_API_KEY production`, `vercel env add EWS_AI_ENABLED production`
+  (value `true`), then `vercel deploy --prod`. Set a monthly spend limit on the key, because the demo is public.
 
 ## Features (SRS traceability)
 
@@ -45,8 +61,9 @@ Acceptance tests **AT-01 … AT-08** from SRS Appendix A are automated in `tests
 **AT-09** (AI assistant) is in `tests/test_ai.py`.
 
 ## Tech stack
-Python 3.11+ · FastAPI · SQLAlchemy 2 + Alembic · SQLite (PostgreSQL-ready) · pandas · scikit-learn ·
-plain HTML/CSS/JavaScript (ES modules) · Chart.js (vendored, no Node build step).
+Python 3.11+ · FastAPI · SQLAlchemy 2 + Alembic · SQLite / PostgreSQL (Neon) · pandas · scikit-learn ·
+Anthropic Python SDK (optional AI assistant) · plain HTML/CSS/JavaScript (ES modules) · Chart.js (vendored,
+no Node build step) · deployed on Vercel.
 
 ## Quick start (Windows / PowerShell)
 
@@ -93,6 +110,9 @@ Interesting seeded cases: **S20260001** (the demo student, declining after the m
 3. `advisor1` → Support & Requests → resolve the correction request.
 4. `admin` → Data Import → upload `sample_data/example_with_errors_attendance.csv` (rejected with line-level errors), then `example_attendance_week11_SSC-MATH.csv` (validate → commit → background re-assessment) → Administration → audit log / model monitor.
 5. `analyst` → Reports → only suppressed, de-identified figures; identifiable export is refused and audited.
+6. *(AI enabled only)* `teacher1` → open a High/Critical student → **Generate summary** → **Personalize with AI**
+   → approve a suggestion → in the plan, **AI drafts → Draft message** (বাংলা) → `student` → My Progress →
+   add a goal → **Plan with AI**. `admin` → Administration → audit log shows each `ai.generate` call.
 
 ## Tests & quality
 
@@ -162,8 +182,8 @@ backend/app/
 alembic/       database migrations
 frontend/      role-based web UI (HTML/CSS/ES modules, Chart.js)
 sample_data/   CSV templates and example import files
-tests/         acceptance (AT-01..08) and unit tests
-docs/          architecture, model card, API notes
+tests/         acceptance (AT-01..09) and unit tests
+docs/          architecture, model card, API notes, AI integration plan
 ```
 
 ## Documentation
