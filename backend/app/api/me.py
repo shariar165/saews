@@ -47,7 +47,7 @@ def support(user: User = Depends(student_only), db: Session = Depends(get_db)):
                        .options(selectinload(SupportPlan.owner)).order_by(SupportPlan.due_date))
     return {
         "recommendations": [{"id": r.id, "title": r.title, "text": r.edited_text or r.rationale,
-                             "approved_at": iso(r.reviewed_at)} for r in recs],
+                             "ai_assisted": bool(r.ai_drafted), "approved_at": iso(r.reviewed_at)} for r in recs],
         "plans": [{"id": p.id, "title": p.title, "description": p.description, "owner": user_brief(p.owner),
                    "due_date": p.due_date.isoformat() if p.due_date else None, "status": p.status} for p in plans],
     }

@@ -1,10 +1,12 @@
 import { api } from "./api.js";
+import { aiStatus, goalPlanHtml, hasFeature, runAi } from "./ai.js";
 import { line } from "./charts.js";
-import { $, esc, fmtDate, fmtDateTime, initShell, titleCase, toast, todayLong } from "./ui.js";
+import { $, esc, fmtDate, fmtDateTime, icon, initShell, titleCase, toast, todayLong } from "./ui.js";
 
 const user = await initShell("me.html", ["student"]);
 if (user) {
-  const profile = await api("/me/profile");
+  const [profile, ai] = await Promise.all([api("/me/profile"), aiStatus()]);
+  const aiGoals = hasFeature(ai, "goal_plan");
   $("#main").innerHTML = `
     <section class="welcome"><p class="eyebrow">${esc(todayLong())}</p>
       <h1>Hello, ${esc(profile.full_name.split(" ")[0])} 👋</h1>
@@ -20,7 +22,9 @@ if (user) {
         <section class="card"><h2>My support plan</h2><div id="support"></div></section>
       </div>
       <div class="stack">
-        <section class="card"><h2>My study goals</h2><ul class="list" id="goals"></ul>
+        <section class="card"><h2>My study goals</h2>
+          ${aiGoals ? `<p class="small muted">${icon("sparkle")} Use <em>Plan with AI</em> to turn a goal into small weekly steps. The AI sees your subjects and marks, never your name.</p>` : ""}
+          <ul class="list" id="goals"></ul>
           <form id="goal-form" class="row" style="margin-top:.6rem;align-items:flex-end">
             <div class="field" style="flex:2"><label for="g-title">New goal</label><input id="g-title" required minlength="3" maxlength="200" placeholder="e.g. Submit all homework on time"></div>
             <div class="field"><label for="g-date">Target date</label><input id="g-date" type="date"></div>
@@ -54,7 +58,9 @@ if (user) {
     $("#goals").innerHTML = items.length ? items.map((g) => `<li><div class="list-title">${esc(g.title)} <span class="tag ${g.status === "achieved" ? "ok" : ""}">${esc(g.status)}</span></div>
       <div class="small muted">Target ${fmtDate(g.target_date)}</div>
       <div class="actions">${g.status === "active" ? `<button class="btn small secondary" data-goal="${g.id}" data-status="achieved">Mark achieved</button>` : ""}
-      <button class="btn small ghost" data-del="${g.id}">Remove</button></div></li>`).join("") : `<li class="muted small">No goals yet.</li>`;
+      ${aiGoals && g.status === "active" ? `<select id="gl-${g.id}" aria-label="Language for the AI plan"><option value="en">English</option><option value="bn">বাংলা</option></select>
+        <button class="btn small secondary" data-ai-goal="${g.id}">${icon("sparkle")}Plan with AI</button>` : ""}
+      <button class="btn small ghost" data-del="${g.id}">Remove</button></div><div id="gp-${g.id}"></div></li>`).join("") : `<li class="muted small">No goals yet.</li>`;
   }
   async function loadReqs() {
     const { items } = await api("/me/requests");
@@ -69,7 +75,13 @@ if (user) {
     catch (ex) { toast(ex.message, "error"); }
   });
   $("#goals").addEventListener("click", async (e) => {
-    const b = e.target.closest("button"); if (!b) return;
+    const b = e.target.closest("button"); if (!b || b.dataset.copy) return;
+    if (b.dataset.aiGoal) {
+      const gid = b.dataset.aiGoal, regen = b.dataset.regen === "1";
+      const r = await runAi(b, () => api(`/ai/me/goals/${gid}/plan`, { method: "POST", body: { language: $(`#gl-${gid}`).value, refresh: regen } }));
+      if (r) { $(`#gp-${gid}`).innerHTML = goalPlanHtml(r.item); b.dataset.regen = "1"; b.innerHTML = `${icon("refresh")}New plan`; }
+      return;
+    }
     try {
       if (b.dataset.del) await api(`/me/goals/${b.dataset.del}`, { method: "DELETE" });
       else await api(`/me/goals/${b.dataset.goal}`, { method: "PATCH", body: { status: b.dataset.status } });

@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import AliasChoices, Field, field_validator
+from pydantic import AliasChoices, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -47,6 +47,16 @@ class Settings(BaseSettings):
     retention_days: int = 730  # historical risk assessments / closed import batches
     audit_retention_days: int = 365
     max_upload_bytes: int = 5 * 1024 * 1024
+
+    # Generative AI assistant (optional). Off unless EWS_AI_ENABLED=true AND an API key is set; when off,
+    # every AI feature hides itself and the system behaves exactly as without it.
+    ai_enabled: bool = False
+    anthropic_api_key: SecretStr | None = Field(
+        default=None, validation_alias=AliasChoices("EWS_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY"))
+    ai_model: str = "claude-opus-5-5"
+    ai_effort: str = "low"  # low | medium | high — short, bounded writing tasks need little reasoning
+    ai_timeout_seconds: float = 90.0
+    ai_rate_limit: str = "20/minute"
 
     @field_validator("database_url")
     @classmethod

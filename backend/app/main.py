@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from .api import admin, auth, imports, me, meta, reports, risk, students, workflow
+from .api import admin, ai, auth, imports, me, meta, reports, risk, students, workflow
 from .config import PROJECT_ROOT, get_settings
 from .core.ratelimit import limiter
 
@@ -55,7 +55,7 @@ def create_app() -> FastAPI:
         return JSONResponse({"detail": "An internal error occurred. It has been logged."}, status_code=500)
 
     for r in (auth.router, meta.router, students.router, students.staff_router, risk.router, workflow.router,
-              me.router, imports.router, reports.router, admin.router):
+              me.router, imports.router, reports.router, admin.router, ai.router):
         app.include_router(r, prefix="/api")
 
     frontend = PROJECT_ROOT / "frontend"

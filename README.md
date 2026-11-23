@@ -39,8 +39,10 @@ The [suggested walkthrough](#suggested-demo-walkthrough) works there too.
 | FR8 | Audit log (views, denials, exports, logins, role changes), correction requests routed to a reviewer, retention job | `core/audit.py`, `services/retention.py` |
 | FR9 | Aggregate reports, de-identified exports (pseudonyms, small-cell suppression), identifiable export only when authorized | `services/reports.py` |
 | FR10 | Rule-based fallback, clearly labelled, when the model is unavailable; "unavailable" state if both fail; model monitor | `services/risk_engine.py`, Administration page |
+| AI (optional) | Generative AI assistant (Claude): plain-language case summaries, personalized suggestion drafts, outcome notes, Bangla/English guardian messages, student study-goal plans. Off by default, pseudonymized, audited, always a labelled draft | `ai/`, `api/ai.py`, see [AI assistant](#ai-assistant-optional) |
 
-Acceptance tests **AT-01 … AT-08** from SRS Appendix A are automated in `tests/test_acceptance.py`.
+Acceptance tests **AT-01 … AT-08** from SRS Appendix A are automated in `tests/test_acceptance.py`;
+**AT-09** (AI assistant) is in `tests/test_ai.py`.
 
 ## Tech stack
 Python 3.11+ · FastAPI · SQLAlchemy 2 + Alembic · SQLite (PostgreSQL-ready) · pandas · scikit-learn ·
@@ -95,7 +97,7 @@ Interesting seeded cases: **S20260001** (the demo student, declining after the m
 ## Tests & quality
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest        # 29 tests: AT-01..AT-08 + unit tests
+.\.venv\Scripts\python.exe -m pytest        # 39 tests: AT-01..AT-09 + unit tests (AI tests use a fake client)
 .\.venv\Scripts\python.exe -m ruff check .
 ```
 
@@ -116,10 +118,43 @@ risk thresholds, `EWS_STALE_AFTER_DAYS`, `EWS_MIN_GROUP_SIZE`, retention periods
 `EWS_DATABASE_URL=postgresql+psycopg://user:pass@host:5432/saews`, then run
 `.\.venv\Scripts\python.exe -m alembic upgrade head`.
 
+## AI assistant (optional)
+
+SAEWS can use Claude (Anthropic) to draft plain-language text. The risk model itself is unchanged: the AI
+only *writes*, from data SAEWS already shows to the signed-in user.
+
+| Who | Feature | Where |
+|---|---|---|
+| Teacher / advisor / admin | **AI summary** of the current assessment, with supportive conversation-starter questions | Student profile |
+| Teacher / advisor / admin | **Personalize with AI**: rewrites the template text of *proposed* suggestions for this student; staff still approve, edit or dismiss | Student profile → Suggested support |
+| Teacher / advisor / admin | **Draft outcome note** from a plan's interventions and before/after indicators | Student profile → plan → AI drafts |
+| Teacher / advisor / admin | **Draft message** to the guardian or student in **বাংলা** or English, to copy and send yourself | Student profile → plan → AI drafts |
+| Student | **Plan with AI**: turns a study goal into weekly steps (never sees risk labels) | My Progress → My study goals |
+
+Safeguards: off unless enabled; only pseudonymized indicators are sent (no names, student codes, emails or
+`equity_group`; free text is scrubbed, and names are filled into messages locally after generation); every
+call is audited (`ai.generate`) and stored in `ai_outputs`; role and per-record checks apply; output is always
+labelled as an AI draft; nothing is sent or approved automatically; one shared rate limit for all AI routes
+(default 20 requests per minute per client, `EWS_AI_RATE_LIMIT`); refusals and errors
+fall back to the normal, non-AI behaviour.
+
+To enable it, set these (in `.env` locally, or with `vercel env add` for the live demo), then run the migration:
+
+```powershell
+EWS_AI_ENABLED=true
+ANTHROPIC_API_KEY=sk-ant-...        # from console.anthropic.com
+# optional: EWS_AI_MODEL=claude-opus-5-5  EWS_AI_EFFORT=low  EWS_AI_RATE_LIMIT=20/minute
+.\.venv\Scripts\python.exe -m alembic upgrade head   # adds the ai_outputs table (also needed on Neon)
+```
+
+> Real student data must not be sent to an external AI provider without the institution's approval.
+> The bundled data is synthetic.
+
 ## Project layout
 ```
 backend/app/
-  api/         REST endpoints (auth, students, risk, workflow, me, imports, reports, admin)
+  api/         REST endpoints (auth, students, risk, workflow, me, imports, reports, admin, ai)
+  ai/          optional AI assistant: Claude client, privacy gateway, prompts, output schemas
   core/        security (Argon2id, JWT), authorization dependencies, audit, rate limiting
   ml/          features, rules engine, explanations, model loading, training, evaluation
   services/    risk engine, recommendations, imports, indicators, reports, retention
@@ -135,6 +170,7 @@ docs/          architecture, model card, API notes
 - [Architecture & diagrams](docs/architecture.md)
 - [Model card](docs/model_card.md)
 - [API overview](docs/api.md) (interactive docs at `/api/docs`)
+- [AI integration plan](docs/ai_integration_plan.md)
 
 ## Limitations (SRS Appendix B)
 This is a prototype trained and demonstrated on **synthetic data**. Before any real use, the

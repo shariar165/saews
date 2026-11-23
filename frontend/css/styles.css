@@ -579,3 +579,16 @@ td.loading { display: table-cell; padding: 1.5rem var(--card-pad) !important; }
   .card { box-shadow: none; break-inside: avoid; }
   .container > * { animation: none; }
 }
+
+/* ---------- AI assistant (always labelled; uses theme tokens so it works in light and dark) ---------- */
+.tag.ai { background: var(--primary-soft); border-color: var(--primary-border); color: var(--primary-text); }
+.tag.ai svg.i { width: 12px; height: 12px; }
+.ai-box { margin-top: .75rem; padding: .85rem 1rem; border-radius: 12px; background: var(--surface-2);
+  border: 1px solid var(--primary-border); border-left: 4px solid var(--primary-solid); }
+.ai-box p { margin: .35rem 0; }
+.ai-box h4 { margin: .8rem 0 .25rem; font-size: .85rem; }
+.ai-box ul { margin: .2rem 0; padding-left: 1.1rem; }
+.ai-head { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.ai-head .btn { margin-left: auto; }
+.ai-message { white-space: pre-wrap; }
+.ai-foot { margin: .6rem 0 0 !important; }

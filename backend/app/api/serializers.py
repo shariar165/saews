@@ -93,7 +93,7 @@ def recommendation_out(r: Recommendation) -> dict:
     return {"id": r.id, "student_id": r.student_id, "assessment_id": r.assessment_id, "code": r.catalog_code,
             "title": r.title, "rationale": r.rationale, "text": r.edited_text or r.rationale, "edited": bool(r.edited_text),
             "score": r.score, "status": r.status, "review_note": r.review_note, "reviewed_at": _dt(r.reviewed_at),
-            "created_at": _dt(r.created_at)}
+            "created_at": _dt(r.created_at), "ai_drafted": bool(r.ai_drafted)}
 
 
 def intervention_out(i: Intervention) -> dict:

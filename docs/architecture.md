@@ -14,6 +14,7 @@ flowchart LR
     REC[Recommendation engine]
     IMP[Import validator]
     AUD[Audit logger]
+    AI[AI assistant<br/>optional · drafts only]
     BG[Background refresh<br/>BackgroundTasks]
   end
   subgraph ML[ML layer]
@@ -32,6 +33,9 @@ flowchart LR
   RISK --> MODEL
   RISK -. model unavailable .-> RULES
   RISK --> REC --> DB
+  API --> AI
+  AI -->|pseudonymized indicators only| CLAUDE[(Claude API<br/>Anthropic)]
+  AI --> AUD
 ```
 
 ## Risk-assessment pipeline (SRS §7.3)

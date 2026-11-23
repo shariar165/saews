@@ -17,6 +17,7 @@ from sqlalchemy import (
     Text,
     TypeDecorator,
     UniqueConstraint,
+    false,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -252,6 +253,8 @@ class Recommendation(Base):
     reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    # True when `rationale` was personalized by the AI assistant (still a staff-reviewed draft).
+    ai_drafted: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
 
 class SupportPlan(Base):
@@ -319,6 +322,28 @@ class StudyGoal(Base):
     target_date: Mapped[date | None] = mapped_column(Date)
     status: Mapped[str] = mapped_column(String(20), default="active")  # active | achieved | dropped
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+# ---------------------------------------------------------------- generative AI
+class AIOutput(Base):
+    """Every AI-generated draft, kept for reuse (no repeat cost) and accountability. The prompt itself is not
+    stored; it is rebuilt from pseudonymized data and can be reproduced from `prompt_version`."""
+
+    __tablename__ = "ai_outputs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # case_summary | rec_personalize | outcome_note | support_message | goal_plan
+    feature: Mapped[str] = mapped_column(String(40), index=True)
+    target_type: Mapped[str] = mapped_column(String(40))  # assessment | student | plan | goal
+    target_id: Mapped[int] = mapped_column(Integer, index=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey("students.id", ondelete="CASCADE"), index=True)
+    variant: Mapped[str | None] = mapped_column(String(40))  # e.g. "guardian:bn"
+    model: Mapped[str] = mapped_column(String(60))
+    prompt_version: Mapped[str] = mapped_column(String(20))
+    output: Mapped[dict] = mapped_column(JSON, default=dict)
+    input_tokens: Mapped[int | None] = mapped_column(Integer)
+    output_tokens: Mapped[int | None] = mapped_column(Integer)
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
 
 
 # ---------------------------------------------------------------- governance

@@ -21,6 +21,7 @@ dependencies = [
     "scikit-learn~=1.9.1",
     "joblib>=1.4",
     "psycopg[binary]>=3.2",
+    "anthropic>=2.12,<3",
 ]
 
 [tool.pytest.ini_options]

@@ -37,3 +37,20 @@ and four classes leave small test subgroups, so part of this is noise, and the f
 - Engagement signals can reflect access barriers (devices, connectivity, disability) rather than motivation. Recommendations are worded to check access, not to assume a cause.
 - Linear model: interactions are not captured; contributions are relative to the training population.
 - Thresholds trade recall against alert workload. They must be set with stakeholders.
+
+## Generative AI assistant (separate from the risk model)
+
+The optional AI assistant (`backend/app/ai/`) does **not** predict risk and does not change the risk model above.
+It uses a large language model (Claude by Anthropic, default `claude-opus-5-5`, configurable with `EWS_AI_MODEL`)
+only to write drafts from data SAEWS already computes: case summaries, personalized suggestion wording,
+outcome notes, guardian/student messages (Bangla or English), and student study-goal plans.
+
+- **Inputs:** pseudonymized indicators only (`ai/privacy.py`); no names, student codes, emails or `equity_group`.
+  Student-facing prompts contain no risk level, probability or factors.
+- **Outputs:** structured JSON validated against `ai/schemas.py`, stored in `ai_outputs` with model and
+  `prompt_version`, audited as `ai.generate`, and always labelled as an AI draft for human review.
+- **Failure behaviour:** refusals, errors and timeouts return a clear message; the rest of the system is unaffected.
+- **Known limitations:** an LLM can misread numbers or phrase things poorly, so staff must check every draft
+  against the record. Prompt quality has only been checked on synthetic students. Before real use, review a
+  sample of outputs per risk level for accuracy, tone and Bangla quality, and get institutional approval for
+  sending pseudonymized data to an external provider.

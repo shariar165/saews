@@ -16,3 +16,4 @@ numpy>=2.1
 scikit-learn~=1.9.1  # pinned: the committed model artifact was pickled with 1.9.x
 joblib>=1.4
 psycopg[binary]>=3.2  # PostgreSQL driver (Neon on Vercel)
+anthropic>=2.12,<3  # optional AI assistant (Claude); only used when EWS_AI_ENABLED=true

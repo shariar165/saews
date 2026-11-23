@@ -1,4 +1,5 @@
 import { api } from "./api.js";
+import { aiStatus, aiTag, caseSummaryHtml, hasFeature, messageHtml, outcomeNoteHtml, runAi } from "./ai.js";
 import { line } from "./charts.js";
 import { $, avatar, emptyRow, esc, fmtDate, fmtDateTime, icon, initShell, methodTag, pct, qs, riskBadge, titleCase, toast } from "./ui.js";
 
@@ -14,6 +15,7 @@ const TRACKED = [
   { k: "avg_logins", label: "Logins/wk", fmt: (v) => (v == null ? "—" : v.toFixed(1)), better: 1 },
 ];
 let staff = [];
+let ai = { enabled: false, features: [] };
 
 if (user && id) {
   try { await render(); } catch (e) {
@@ -25,8 +27,9 @@ if (user && id) {
 }
 
 async function render() {
-  const [st, staffRes] = await Promise.all([api(`/students/${id}`), api("/staff")]);
+  const [st, staffRes, aiRes] = await Promise.all([api(`/students/${id}`), api("/staff"), aiStatus()]);
   staff = staffRes.items;
+  ai = aiRes;
   document.title = `${st.full_name} · SAEWS`;
   main.innerHTML = `
     <p class="small" style="margin:0 0 .75rem"><a class="back-link" href="students.html">${icon("arrowLeft")} Students</a></p>
@@ -39,6 +42,9 @@ async function render() {
     <div class="grid grid-main">
       <div class="stack">
         <section class="card" id="assessment" aria-labelledby="ra-title"></section>
+        ${hasFeature(ai, "case_summary") ? `<section class="card" aria-labelledby="ai-title"><div class="card-head"><h2 id="ai-title">AI summary</h2>
+          <button class="btn small secondary" id="ai-summary-btn" type="button">${icon("sparkle")}Generate summary</button></div>
+          <div id="ai-summary"><p class="small muted">The AI assistant can explain this assessment in plain language and suggest supportive questions. It sees indicators only, never the student's name.</p></div></section>` : ""}
         <section class="card"><h2>Progress indicators</h2>
           <div class="grid grid-2">
             <div><h3>Weekly attendance</h3><div class="chart-box short"><canvas id="c-att" role="img" aria-label="Weekly attendance rate"></canvas></div></div>
@@ -51,7 +57,9 @@ async function render() {
           <tbody id="history"></tbody></table></div></section>
       </div>
       <div class="stack">
-        <section class="card"><h2>Suggested support</h2><p class="small muted">Suggestions must be approved or edited by staff before the student sees them.</p><ul class="list" id="recs"></ul></section>
+        <section class="card"><div class="card-head"><h2>Suggested support</h2>
+          ${hasFeature(ai, "rec_personalize") ? `<button class="btn small secondary" id="ai-personalize" type="button" hidden>${icon("sparkle")}Personalize with AI</button>` : ""}</div>
+          <p class="small muted">Suggestions must be approved or edited by staff before the student sees them.</p><ul class="list" id="recs"></ul></section>
         <section class="card"><div class="card-head"><h2>Support plans &amp; interventions</h2></div><div id="plans"></div>
           <details class="inline-form"><summary>Create a support plan manually</summary>
             <form id="plan-form"><div class="field"><label for="p-title">Title</label><input id="p-title" required minlength="3" maxlength="200"></div>
@@ -78,7 +86,26 @@ async function render() {
       e.target.reset(); e.target.closest("details").open = false; toast("Support plan created", "success"); loadPlans();
     } catch (ex) { toast(ex.message, "error"); }
   });
+  if (hasFeature(ai, "case_summary")) {
+    api(`/ai/students/${id}/case-summary`).then(({ item }) => item && showSummary(item)).catch(() => {});
+    $("#ai-summary-btn").addEventListener("click", async (e) => {
+      const refresh = e.currentTarget.dataset.refresh === "1";
+      const r = await runAi(e.currentTarget, () => api(`/ai/students/${id}/case-summary${refresh ? "?refresh=true" : ""}`, { method: "POST" }));
+      if (r) showSummary(r.item);
+    });
+  }
+  $("#ai-personalize")?.addEventListener("click", async (e) => {
+    const r = await runAi(e.currentTarget, () => api(`/ai/students/${id}/recommendations/personalize`, { method: "POST" }));
+    if (r) { toast(`${r.items.length} suggestion(s) personalized. Review them before approving.`, "success"); loadRecs(); }
+  });
   await Promise.all([loadIndicators(), loadHistory(), loadRecs(), loadPlans(), loadRequests()]);
+}
+
+function showSummary(item) {
+  $("#ai-summary").innerHTML = caseSummaryHtml(item);
+  const btn = $("#ai-summary-btn");
+  btn.dataset.refresh = "1";
+  btn.innerHTML = `${icon("refresh")}Regenerate`;
 }
 
 function ownerOptions(selected) {
@@ -156,10 +183,12 @@ async function loadHistory() {
 async function loadRecs() {
   const { items } = await api(`/students/${id}/recommendations`);
   const list = $("#recs");
+  const pb = $("#ai-personalize");
+  if (pb) pb.hidden = !items.some((r) => r.status === "proposed" && !r.ai_drafted);
   if (!items.length) { list.innerHTML = `<li class="muted small">No suggestions. Suggestions appear for moderate or higher risk.</li>`; return; }
   const due = new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10);
   list.innerHTML = items.map((r) => `<li data-rec="${r.id}">
-      <div class="list-title">${esc(r.title)} <span class="tag ${r.status === "approved" ? "ok" : r.status === "dismissed" ? "" : "info"}">${esc(r.status)}</span></div>
+      <div class="list-title">${esc(r.title)} <span class="tag ${r.status === "approved" ? "ok" : r.status === "dismissed" ? "" : "info"}">${esc(r.status)}</span>${r.ai_drafted ? aiTag() : ""}</div>
       <p class="small" style="margin:.3rem 0">${esc(r.text)}</p>
       ${r.review_note ? `<p class="small muted">Note: ${esc(r.review_note)}</p>` : ""}
       ${r.status === "proposed" ? `
@@ -238,6 +267,7 @@ async function loadPlans() {
           <div class="field"><label for="ot-${iv.id}">Outcome</label><textarea id="ot-${iv.id}" required maxlength="4000"></textarea></div>
           <div class="actions"><button class="btn small" type="submit">Save outcome</button></div></form></details>` : ""}
     </div>`).join("")}</div>` : ""}
+    ${planAiTools(p)}
     <details class="inline-form"><summary>Record an intervention</summary>
       <form data-add-iv="${p.id}"><div class="row">
         <div class="field"><label for="ia-${p.id}">Action</label><select id="ia-${p.id}">${ACTIONS.map((a) => `<option value="${a}">${titleCase(a)}</option>`).join("")}</select></div>
@@ -246,6 +276,34 @@ async function loadPlans() {
         <div class="actions"><button class="btn small" type="submit">Save</button></div></form></details>
   </li>`).join("")}</ul>`;
 }
+
+function planAiTools(p) {
+  const note = hasFeature(ai, "outcome_note") && p.interventions.length;
+  const msg = hasFeature(ai, "support_message") && p.status !== "cancelled";
+  if (!note && !msg) return "";
+  return `<details class="inline-form"><summary>${icon("sparkle")}AI drafts</summary>
+    ${note ? `<div class="actions"><button class="btn small secondary" type="button" data-ai-note="${p.id}">Draft outcome note</button></div>` : ""}
+    ${msg ? `<div class="row" style="align-items:flex-end;margin-top:.5rem">
+        <div class="field" style="margin:0"><label for="ma-${p.id}">Message to</label><select id="ma-${p.id}"><option value="guardian">Guardian</option><option value="student">Student</option></select></div>
+        <div class="field" style="margin:0"><label for="ml-${p.id}">Language</label><select id="ml-${p.id}"><option value="bn">বাংলা (Bangla)</option><option value="en">English</option></select></div></div>
+      <div class="actions"><button class="btn small secondary" type="button" data-ai-msg="${p.id}">Draft message</button></div>` : ""}
+    <div id="ai-plan-${p.id}"></div>
+    <p class="small muted">Drafts are never sent automatically. Check, edit and send them yourself.</p></details>`;
+}
+
+$("#main").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-ai-note],[data-ai-msg]");
+  if (!b) return;
+  if (b.dataset.aiNote) {
+    const pid = b.dataset.aiNote;
+    const r = await runAi(b, () => api(`/ai/plans/${pid}/outcome-note`, { method: "POST" }));
+    if (r) $(`#ai-plan-${pid}`).innerHTML = outcomeNoteHtml(r.item);
+  } else {
+    const pid = b.dataset.aiMsg;
+    const r = await runAi(b, () => api(`/ai/plans/${pid}/message`, { method: "POST", body: { audience: $(`#ma-${pid}`).value, language: $(`#ml-${pid}`).value } }));
+    if (r) $(`#ai-plan-${pid}`).innerHTML = messageHtml(r.item);
+  }
+});
 
 async function loadRequests() {
   const { items } = await api(`/students/${id}/requests`);
